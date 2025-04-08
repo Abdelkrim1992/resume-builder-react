@@ -16,7 +16,7 @@ const Login = () => {
     const timer = setTimeout(() => {
       try {
         // This is just a test to see if we can access Clerk
-        if (window.Clerk === undefined) {
+        if (!document.querySelector('[data-clerk-frontend-api]')) {
           setClerkError(true);
         }
       } catch (error) {

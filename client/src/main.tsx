@@ -5,9 +5,13 @@ import { queryClient } from "./lib/queryClient";
 import App from "./App";
 import "./index.css";
 
-// We need to provide a complete, valid Clerk publishable key
-// Make sure it includes any trailing characters (common issue)
-const CLERK_PUBLISHABLE_KEY = "pk_test_Y2xhc3NpYy1tYW1tb3RoLTI4LmNsZXJrLmFjY291bnRzLmRldiQ";
+// Import your Publishable Key from environment variables
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_Y2xhc3NpYy1tYW1tb3RoLTI4LmNsZXJrLmFjY291bnRzLmRldiQ";
+
+// Verify the key is available
+if (!CLERK_PUBLISHABLE_KEY) {
+  console.error("Missing Clerk Publishable Key");
+}
 
 function Main() {
   try {
