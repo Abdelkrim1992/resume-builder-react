@@ -1,32 +1,65 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { SignIn } from "@clerk/clerk-react";
-import { dark } from "@clerk/themes";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
+
+// Import the auth state handler from a proper location
+const useAuthState = () => {
+  // Check localStorage to see if we have a temp user
+  const storedUser = localStorage.getItem('tempUser');
+  const [isSignedIn, setIsSignedIn] = useState(!!storedUser);
+  const [user, setUser] = useState(storedUser ? JSON.parse(storedUser) : null);
+
+  const signIn = (userData: any) => {
+    localStorage.setItem('tempUser', JSON.stringify(userData));
+    setUser(userData);
+    setIsSignedIn(true);
+  };
+
+  const signOut = () => {
+    localStorage.removeItem('tempUser');
+    setUser(null);
+    setIsSignedIn(false);
+  };
+
+  return { isSignedIn, user, signIn, signOut };
+};
 
 const Login = () => {
   const [_, navigate] = useLocation();
-  // We'll use a simple dark mode detection for now
-  const isDarkMode = false;
-  const [clerkError, setClerkError] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { signIn, isSignedIn } = useAuthState();
 
+  // If already signed in, redirect to home
   useEffect(() => {
-    // Check if Clerk is available
-    const timer = setTimeout(() => {
-      try {
-        // This is just a test to see if we can access Clerk
-        if (!document.querySelector('[data-clerk-frontend-api]')) {
-          setClerkError(true);
-        }
-      } catch (error) {
-        console.error("Error checking Clerk availability:", error);
-        setClerkError(true);
-      }
-    }, 2000); // Wait a bit to see if Clerk initializes
+    if (isSignedIn) {
+      navigate("/");
+    }
+  }, [isSignedIn, navigate]);
 
-    return () => clearTimeout(timer);
-  }, []);
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Create a user object and save to localStorage
+    const userData = {
+      name: email.split('@')[0], // Simple way to get a name from the email
+      email: email,
+      imageUrl: null // No image for now
+    };
+    
+    signIn(userData);
+    
+    toast({
+      title: "Logged in successfully",
+      description: "Welcome back!",
+    });
+    
+    // Redirect to the home page
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
@@ -47,32 +80,45 @@ const Login = () => {
         </div>
         
         <Card className="p-6">
-          {clerkError ? (
-            <div className="text-center py-8">
-              <p className="text-destructive mb-4">
-                Our authentication service is temporarily unavailable.
-              </p>
-              <Button onClick={() => navigate("/")} className="w-full">
-                Return to Home
-              </Button>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
-          ) : (
-            <SignIn 
-              signUpUrl="/sign-up"
-              redirectUrl="/"
-              appearance={{
-                baseTheme: isDarkMode ? dark : undefined,
-                elements: {
-                  formButtonPrimary: 
-                    "bg-primary hover:bg-primary/90 text-primary-foreground",
-                  formFieldInput:
-                    "border-input bg-background text-foreground",
-                  card: "bg-transparent shadow-none",
-                  footer: "hidden"
-                }
-              }}
-            />
-          )}
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link href="#" className="text-sm text-primary hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            
+            <Button type="submit" className="w-full mt-4">
+              Sign in
+            </Button>
+          </form>
+          
+          <div className="mt-4 pt-4 border-t border-border">
+            <Button variant="outline" className="w-full" onClick={() => navigate("/")}>
+              Continue as Guest
+            </Button>
+          </div>
         </Card>
         
         <div className="mt-4 text-center">

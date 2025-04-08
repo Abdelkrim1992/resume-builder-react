@@ -1,8 +1,6 @@
+import { useState, useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
-import { useUser, RedirectToSignIn } from "@clerk/clerk-react";
 
 // Pages
 import Home from "@/pages/Home";
@@ -18,28 +16,50 @@ import NotFound from "@/pages/not-found";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+// Mock authentication state
+const useAuthState = () => {
+  // Check localStorage to see if we have a temp user
+  const storedUser = localStorage.getItem('tempUser');
+  const [isSignedIn, setIsSignedIn] = useState(!!storedUser);
+  const [user, setUser] = useState(storedUser ? JSON.parse(storedUser) : null);
+
+  // Setup effect to listen for storage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const user = localStorage.getItem('tempUser');
+      setIsSignedIn(!!user);
+      setUser(user ? JSON.parse(user) : null);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  return { isSignedIn, user };
+};
+
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  try {
-    const { isSignedIn, isLoaded } = useUser();
-    
-    // Show loading state while Clerk is initializing
-    if (!isLoaded) {
-      return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-    }
-    
-    // If the user is not signed in, redirect to sign-in
+  const { isSignedIn } = useAuthState();
+  const [_, navigate] = useLocation();
+
+  useEffect(() => {
     if (!isSignedIn) {
-      return <RedirectToSignIn />;
+      navigate("/login");
     }
-    
-    // If user is signed in, render the protected content
-    return <>{children}</>;
-  } catch (error) {
-    console.error("Error in ProtectedRoute:", error);
-    // Fallback for Clerk errors - allow access in development
+  }, [isSignedIn, navigate]);
+
+  // If signed in, render the children
+  if (isSignedIn) {
     return <>{children}</>;
   }
+
+  // Otherwise show loading state - redirect will happen in effect
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>
+  );
 };
 
 function Router() {
@@ -101,10 +121,10 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <Router />
       <Toaster />
-    </QueryClientProvider>
+    </>
   );
 }
 

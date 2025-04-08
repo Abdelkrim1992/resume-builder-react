@@ -7,8 +7,6 @@ import {
   LogOut, 
   ChevronDown
 } from "lucide-react";
-import logoImage from "@/assets/images/logo.svg";
-import { useUser, useClerk } from "@clerk/clerk-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,26 +20,34 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 
+// Mock user state
+const useAuthState = () => {
+  // Check localStorage to see if we have a temp user
+  const storedUser = localStorage.getItem('tempUser');
+  const [isSignedIn, setIsSignedIn] = useState(!!storedUser);
+  const [user, setUser] = useState(storedUser ? JSON.parse(storedUser) : null);
+
+  const signIn = (userData: any) => {
+    localStorage.setItem('tempUser', JSON.stringify(userData));
+    setUser(userData);
+    setIsSignedIn(true);
+  };
+
+  const signOut = () => {
+    localStorage.removeItem('tempUser');
+    setUser(null);
+    setIsSignedIn(false);
+  };
+
+  return { isSignedIn, user, signIn, signOut };
+};
+
 const Navbar = () => {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  // Add error handling for Clerk
-  let isSignedIn = false;
-  let user = null;
-  let signOut = async () => { console.log("Sign out unavailable"); };
-  
-  try {
-    // Try to get Clerk user data, but don't crash if Clerk is not working
-    const userResult = useUser();
-    const clerkResult = useClerk();
-    
-    isSignedIn = userResult?.isSignedIn || false;
-    user = userResult?.user || null;
-    signOut = clerkResult?.signOut || (async () => { console.log("Sign out unavailable"); });
-  } catch (error) {
-    console.error("Error initializing Clerk in Navbar:", error);
-  }
+  // Use our mock auth state 
+  const { isSignedIn, user, signOut } = useAuthState();
 
   const navLinks = [
     { path: "/", label: "Resume", exact: true },
@@ -57,14 +63,20 @@ const Navbar = () => {
     return location.startsWith(path);
   };
 
-  const handleSignOut = async () => {
-    await signOut();
+  const handleSignOut = () => {
+    signOut();
+    // Navigate to home
+    window.location.href = '/';
   };
 
   // Get user initials for avatar fallback
   const getUserInitials = () => {
-    if (!user?.firstName && !user?.lastName) return "U";
-    return `${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`;
+    if (!user?.name) return "U";
+    const nameparts = user.name.split(' ');
+    if (nameparts.length >= 2) {
+      return `${nameparts[0][0]}${nameparts[1][0]}`;
+    }
+    return nameparts[0][0] || "U";
   };
 
   return (
@@ -74,7 +86,9 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
               <div className="flex items-center">
-                <img src={logoImage} alt="CAREERX.AI Logo" className="h-10 w-auto" />
+                <span className="font-bold text-xl">
+                  CAREERX<span className="text-primary">.AI</span>
+                </span>
               </div>
             </Link>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -103,7 +117,7 @@ const Navbar = () => {
                       <AvatarImage src={user?.imageUrl} />
                       <AvatarFallback>{getUserInitials()}</AvatarFallback>
                     </Avatar>
-                    <span className="max-w-[100px] truncate">{user?.fullName || user?.username}</span>
+                    <span className="max-w-[100px] truncate">{user?.name || "User"}</span>
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -179,8 +193,8 @@ const Navbar = () => {
                     </Avatar>
                   </div>
                   <div className="ml-3">
-                    <div className="text-base font-medium text-foreground">{user?.fullName || user?.username}</div>
-                    <div className="text-sm font-medium text-muted-foreground">{user?.primaryEmailAddress?.emailAddress}</div>
+                    <div className="text-base font-medium text-foreground">{user?.name || "User"}</div>
+                    <div className="text-sm font-medium text-muted-foreground">{user?.email}</div>
                   </div>
                 </div>
                 <Link href="#" className="block px-4 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>
