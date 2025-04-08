@@ -18,6 +18,8 @@ import {
   type ResumeJdMatch,
   type InsertResumeJdMatch
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -285,4 +287,223 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+  
+  // Resume operations
+  async getResume(id: number): Promise<Resume | undefined> {
+    const [resume] = await db.select().from(resumes).where(eq(resumes.id, id));
+    return resume || undefined;
+  }
+
+  async getResumesByUserId(userId: number): Promise<Resume[]> {
+    return await db.select().from(resumes).where(eq(resumes.userId, userId));
+  }
+
+  async createResume(insertResume: InsertResume): Promise<Resume> {
+    const [resume] = await db
+      .insert(resumes)
+      .values({
+        ...insertResume,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return resume;
+  }
+
+  async updateResume(id: number, updateData: Partial<InsertResume>): Promise<Resume | undefined> {
+    const [resume] = await db
+      .update(resumes)
+      .set({
+        ...updateData,
+        updatedAt: new Date()
+      })
+      .where(eq(resumes.id, id))
+      .returning();
+    return resume;
+  }
+
+  async deleteResume(id: number): Promise<boolean> {
+    const result = await db
+      .delete(resumes)
+      .where(eq(resumes.id, id));
+    return true;
+  }
+  
+  // Cover Letter operations
+  async getCoverLetter(id: number): Promise<CoverLetter | undefined> {
+    const [coverLetter] = await db.select().from(coverLetters).where(eq(coverLetters.id, id));
+    return coverLetter || undefined;
+  }
+
+  async getCoverLettersByUserId(userId: number): Promise<CoverLetter[]> {
+    return await db.select().from(coverLetters).where(eq(coverLetters.userId, userId));
+  }
+
+  async createCoverLetter(insertCoverLetter: InsertCoverLetter): Promise<CoverLetter> {
+    const [coverLetter] = await db
+      .insert(coverLetters)
+      .values({
+        ...insertCoverLetter,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return coverLetter;
+  }
+
+  async updateCoverLetter(id: number, updateData: Partial<InsertCoverLetter>): Promise<CoverLetter | undefined> {
+    const [coverLetter] = await db
+      .update(coverLetters)
+      .set({
+        ...updateData,
+        updatedAt: new Date()
+      })
+      .where(eq(coverLetters.id, id))
+      .returning();
+    return coverLetter;
+  }
+
+  async deleteCoverLetter(id: number): Promise<boolean> {
+    await db
+      .delete(coverLetters)
+      .where(eq(coverLetters.id, id));
+    return true;
+  }
+  
+  // Template operations
+  async getTemplate(id: number): Promise<Template | undefined> {
+    const [template] = await db.select().from(templates).where(eq(templates.id, id));
+    return template || undefined;
+  }
+
+  async getAllTemplates(): Promise<Template[]> {
+    return await db.select().from(templates);
+  }
+
+  async getTemplatesByPremiumStatus(isPremium: boolean): Promise<Template[]> {
+    return await db.select().from(templates).where(eq(templates.isPremium, isPremium));
+  }
+
+  async createTemplate(insertTemplate: InsertTemplate): Promise<Template> {
+    const [template] = await db
+      .insert(templates)
+      .values(insertTemplate)
+      .returning();
+    return template;
+  }
+  
+  // Resume Score operations
+  async getResumeScore(id: number): Promise<ResumeScore | undefined> {
+    const [resumeScore] = await db.select().from(resumeScores).where(eq(resumeScores.id, id));
+    return resumeScore || undefined;
+  }
+
+  async getResumeScoreByResumeId(resumeId: number): Promise<ResumeScore | undefined> {
+    const [resumeScore] = await db.select().from(resumeScores).where(eq(resumeScores.resumeId, resumeId));
+    return resumeScore || undefined;
+  }
+
+  async createResumeScore(insertResumeScore: InsertResumeScore): Promise<ResumeScore> {
+    const [resumeScore] = await db
+      .insert(resumeScores)
+      .values({
+        ...insertResumeScore,
+        createdAt: new Date()
+      })
+      .returning();
+    return resumeScore;
+  }
+  
+  // Resume JD Match operations
+  async getResumeJdMatch(id: number): Promise<ResumeJdMatch | undefined> {
+    const [resumeJdMatch] = await db.select().from(resumeJdMatches).where(eq(resumeJdMatches.id, id));
+    return resumeJdMatch || undefined;
+  }
+
+  async getResumeJdMatchesByResumeId(resumeId: number): Promise<ResumeJdMatch[]> {
+    return await db.select().from(resumeJdMatches).where(eq(resumeJdMatches.resumeId, resumeId));
+  }
+
+  async createResumeJdMatch(insertResumeJdMatch: InsertResumeJdMatch): Promise<ResumeJdMatch> {
+    const [resumeJdMatch] = await db
+      .insert(resumeJdMatches)
+      .values({
+        ...insertResumeJdMatch,
+        createdAt: new Date()
+      })
+      .returning();
+    return resumeJdMatch;
+  }
+}
+
+export const storage = new DatabaseStorage();
+
+// Initialize the database with sample templates if needed
+async function initializeDatabase() {
+  try {
+    // Check if templates exist
+    const existingTemplates = await storage.getAllTemplates();
+    
+    // If no templates, create them
+    if (existingTemplates.length === 0) {
+      console.log("[Database] No templates found. Creating default templates...");
+      const templateData: InsertTemplate[] = [
+        {
+          name: "Modern Professional",
+          description: "A clean, modern design suitable for most industries.",
+          previewImage: "modern_professional.svg",
+          structure: { sections: ["header", "summary", "experience", "education", "skills"] },
+          isPremium: false
+        },
+        {
+          name: "Creative Minimal",
+          description: "Perfect for creative industries and design roles.",
+          previewImage: "creative_minimal.svg",
+          structure: { sections: ["header", "portfolio", "experience", "skills", "education"] },
+          isPremium: true
+        },
+        {
+          name: "Executive Classic",
+          description: "Traditional design perfect for executive and management roles.",
+          previewImage: "executive_classic.svg",
+          structure: { sections: ["header", "summary", "experience", "achievements", "education", "skills"] },
+          isPremium: true
+        }
+      ];
+      
+      // Add templates to database
+      for (const template of templateData) {
+        await storage.createTemplate(template);
+      }
+      console.log("[Database] Default templates created successfully");
+    }
+  } catch (error) {
+    console.error("[Database] Error initializing database:", error);
+  }
+}
+
+// Initialize database when server starts
+initializeDatabase();

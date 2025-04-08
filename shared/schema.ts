@@ -1,4 +1,5 @@
-import { pgTable, text, serial, integer, boolean, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, timestamp, primaryKey } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -123,3 +124,39 @@ export type ResumeScore = typeof resumeScores.$inferSelect;
 
 export type InsertResumeJdMatch = z.infer<typeof insertResumeJdMatchSchema>;
 export type ResumeJdMatch = typeof resumeJdMatches.$inferSelect;
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  resumes: many(resumes),
+  coverLetters: many(coverLetters),
+}));
+
+export const resumesRelations = relations(resumes, ({ one, many }) => ({
+  user: one(users, {
+    fields: [resumes.userId],
+    references: [users.id],
+  }),
+  resumeScores: many(resumeScores),
+  resumeJdMatches: many(resumeJdMatches),
+}));
+
+export const coverLettersRelations = relations(coverLetters, ({ one }) => ({
+  user: one(users, {
+    fields: [coverLetters.userId],
+    references: [users.id],
+  }),
+}));
+
+export const resumeScoresRelations = relations(resumeScores, ({ one }) => ({
+  resume: one(resumes, {
+    fields: [resumeScores.resumeId],
+    references: [resumes.id],
+  }),
+}));
+
+export const resumeJdMatchesRelations = relations(resumeJdMatches, ({ one }) => ({
+  resume: one(resumes, {
+    fields: [resumeJdMatches.resumeId],
+    references: [resumes.id],
+  }),
+}));
