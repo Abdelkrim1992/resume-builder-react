@@ -1,0 +1,22 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#F5F7FA" />
+  <rect x="50" y="50" width="300" height="200" rx="8" fill="white" stroke="#E2E8F0" stroke-width="2" />
+  <rect x="70" y="70" width="100" height="20" rx="4" fill="#EDF2F7" />
+  
+  <circle cx="170" cy="150" r="60" fill="white" stroke="#E2E8F0" stroke-width="2" />
+  <path d="M170 90A60 60 0 0 1 228.5 138.5" stroke="#4299E1" stroke-width="12" stroke-linecap="round" />
+  <path d="M228.5 138.5A60 60 0 0 1 170 210" stroke="#E2E8F0" stroke-width="12" stroke-linecap="round" />
+  <text x="160" y="160" font-family="Arial" font-size="24" font-weight="bold" fill="#4A5568">85</text>
+  
+  <rect x="260" y="100" width="70" height="12" rx="4" fill="#4299E1" opacity="0.8" />
+  <rect x="260" y="120" width="70" height="12" rx="4" fill="#48BB78" opacity="0.8" />
+  <rect x="260" y="140" width="70" height="12" rx="4" fill="#ED8936" opacity="0.8" />
+  <rect x="260" y="160" width="70" height="12" rx="4" fill="#A0AEC0" opacity="0.8" />
+  <rect x="260" y="180" width="70" height="12" rx="4" fill="#A0AEC0" opacity="0.8" />
+  
+  <rect x="240" y="100" width="12" height="12" rx="2" fill="#4299E1" />
+  <rect x="240" y="120" width="12" height="12" rx="2" fill="#48BB78" />
+  <rect x="240" y="140" width="12" height="12" rx="2" fill="#ED8936" />
+  <rect x="240" y="160" width="12" height="12" rx="2" fill="#A0AEC0" />
+  <rect x="240" y="180" width="12" height="12" rx="2" fill="#A0AEC0" />
+</svg>

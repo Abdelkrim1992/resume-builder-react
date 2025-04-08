@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
+import logoImage from "@/assets/images/logo.svg";
 
 const Navbar = () => {
   const [location] = useLocation();
@@ -28,12 +29,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
               <div className="flex items-center">
-                <span className="text-2xl text-primary-600 mr-2">
-                  <i className="ri-robot-fill"></i>
-                </span>
-                <span className="font-bold text-gray-800 text-xl">
-                  CAREERX<span className="text-primary-600">.AI</span>
-                </span>
+                <img src={logoImage} alt="CAREERX.AI Logo" className="h-10 w-auto" />
               </div>
             </Link>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

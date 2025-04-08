@@ -12,6 +12,12 @@ import CTASection from "@/components/CTASection";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
+// Import SVG images
+import heroIllustration from "@/assets/images/hero-illustration.svg";
+import featuresIllustration from "@/assets/images/features-illustration.svg";
+import scoreIllustration from "@/assets/images/score-illustration.svg";
+import resumeTemplatePreview from "@/assets/images/resume-template-preview.svg";
+
 const Home = () => {
   const { toast } = useToast();
   
@@ -64,9 +70,11 @@ const Home = () => {
             </div>
             <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6">
               <div className="relative mx-auto w-full rounded-lg shadow-lg overflow-hidden">
-                <div className="w-full h-96 bg-gray-200 flex items-center justify-center">
-                  <span className="text-lg text-gray-600">Professional resume image</span>
-                </div>
+                <img 
+                  src={heroIllustration} 
+                  alt="Resume Builder Illustration" 
+                  className="w-full h-auto"
+                />
                 
                 {/* Floating Resume Card */}
                 <FloatingResumeCard />
@@ -93,6 +101,16 @@ const Home = () => {
             <p className="section-subheading">
               Our AI-powered platform helps you create professional resumes, cover letters, and optimize your job applications.
             </p>
+          </div>
+
+          <div className="mt-10 mb-16">
+            <div className="flex justify-center">
+              <img 
+                src={featuresIllustration} 
+                alt="Resume Builder Features" 
+                className="max-w-full h-auto"
+              />
+            </div>
           </div>
 
           <div className="mt-16">
@@ -139,6 +157,74 @@ const Home = () => {
                 iconBgColor="bg-red-500"
                 learnMoreLink="/resume-builder"
               />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Score Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
+            <div className="lg:col-span-5">
+              <h2 className="section-title">Resume Score</h2>
+              <p className="section-heading">
+                Know where your resume stands
+              </p>
+              <p className="mt-4 text-lg text-gray-500">
+                Our AI-powered scoring system evaluates your resume across multiple dimensions, including ATS compatibility, 
+                content quality, formatting, and keyword optimization.
+              </p>
+              <div className="mt-8">
+                <ul className="space-y-4">
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-gray-500">
+                      <strong className="font-medium text-gray-700">Detailed Analysis:</strong> Get scores across key categories like content, formatting, and readability.
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-gray-500">
+                      <strong className="font-medium text-gray-700">Actionable Suggestions:</strong> Receive specific recommendations to improve your score.
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-gray-500">
+                      <strong className="font-medium text-gray-700">Industry Benchmarks:</strong> See how your resume compares to successful candidates in your field.
+                    </p>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-8">
+                <Link href="/resume-score">
+                  <Button className="w-full sm:w-auto">
+                    Score My Resume
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="mt-12 lg:mt-0 lg:col-span-7">
+              <div className="flex justify-center">
+                <img 
+                  src={scoreIllustration} 
+                  alt="Resume Score Analysis" 
+                  className="max-w-full h-auto rounded-lg shadow-lg" 
+                />
+              </div>
             </div>
           </div>
         </div>
