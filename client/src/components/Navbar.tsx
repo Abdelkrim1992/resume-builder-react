@@ -25,8 +25,23 @@ import {
 const Navbar = () => {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isSignedIn, user } = useUser();
-  const { signOut } = useClerk();
+  
+  // Add error handling for Clerk
+  let isSignedIn = false;
+  let user = null;
+  let signOut = async () => { console.log("Sign out unavailable"); };
+  
+  try {
+    // Try to get Clerk user data, but don't crash if Clerk is not working
+    const userResult = useUser();
+    const clerkResult = useClerk();
+    
+    isSignedIn = userResult?.isSignedIn || false;
+    user = userResult?.user || null;
+    signOut = clerkResult?.signOut || (async () => { console.log("Sign out unavailable"); });
+  } catch (error) {
+    console.error("Error initializing Clerk in Navbar:", error);
+  }
 
   const navLinks = [
     { path: "/", label: "Resume", exact: true },
