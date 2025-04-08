@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
@@ -17,21 +17,68 @@ import NotFound from "@/pages/not-found";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+// Placeholder for protected route
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  // Later this will check for authentication
+  // For now, it just redirects to sign-up
+  const [, setLocation] = useLocation();
+  setLocation("/sign-up");
+  return null;
+};
+
 function Router() {
+  const [location] = useLocation();
+  
+  // Don't show the navbar and footer on auth pages
+  const isAuthPage = location === "/login" || location === "/sign-up";
+
   return (
     <>
-      <Navbar />
+      {!isAuthPage && <Navbar />}
       <Switch>
         <Route path="/" component={Home} />
-        <Route path="/resume-builder" component={ResumeBuilder} />
-        <Route path="/resume-score" component={ResumeScore} />
-        <Route path="/cover-letter" component={CoverLetter} />
-        <Route path="/resume-jd-match" component={ResumeJdMatch} />
+        
+        {/* Protected routes */}
+        <Route path="/resume-builder">
+          {() => (
+            <ProtectedRoute>
+              <ResumeBuilder />
+            </ProtectedRoute>
+          )}
+        </Route>
+        
+        <Route path="/resume-score">
+          {() => (
+            <ProtectedRoute>
+              <ResumeScore />
+            </ProtectedRoute>
+          )}
+        </Route>
+        
+        <Route path="/cover-letter">
+          {() => (
+            <ProtectedRoute>
+              <CoverLetter />
+            </ProtectedRoute>
+          )}
+        </Route>
+        
+        <Route path="/resume-jd-match">
+          {() => (
+            <ProtectedRoute>
+              <ResumeJdMatch />
+            </ProtectedRoute>
+          )}
+        </Route>
+        
+        {/* Auth routes */}
         <Route path="/login" component={Login} />
-        <Route path="/signup" component={SignUp} />
+        
+        <Route path="/sign-up" component={SignUp} />
+        
         <Route component={NotFound} />
       </Switch>
-      <Footer />
+      {!isAuthPage && <Footer />}
     </>
   );
 }

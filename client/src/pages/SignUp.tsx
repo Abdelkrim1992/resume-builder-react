@@ -20,19 +20,15 @@ import {
 } from "@/components/ui/form";
 
 // Signup form schema
-const signupSchema = z
-  .object({
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    username: z.string().min(3, "Username must be at least 3 characters"),
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+const signupSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 const SignUp = () => {
   const { toast } = useToast();
@@ -42,9 +38,7 @@ const SignUp = () => {
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      username: "",
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -54,23 +48,24 @@ const SignUp = () => {
   // Signup mutation
   const { mutate: signup, isPending } = useMutation({
     mutationFn: async (data: z.infer<typeof signupSchema>) => {
-      const { confirmPassword, ...userData } = data;
       const response = await apiRequest("POST", "/api/auth/register", {
-        ...userData,
-        planType: "free",
+        name: data.name,
+        email: data.email,
+        password: data.password,
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
-        title: "Account created",
-        description: "Your account has been created successfully. Please sign in.",
+        title: "Account created successfully",
+        description: "Welcome to CareerX.AI!",
       });
-      navigate("/login");
+      // In a real app, this would store the user session
+      navigate("/");
     },
     onError: (error) => {
       toast({
-        title: "Sign up failed",
+        title: "Signup failed",
         description: error.message || "Please check your information and try again.",
         variant: "destructive",
       });
@@ -96,9 +91,9 @@ const SignUp = () => {
           </Link>
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Create your account</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Already have an account?{" "}
+            Or{" "}
             <Link href="/login" className="font-medium text-primary-600 hover:text-primary-500">
-              Sign in
+              sign in to your existing account
             </Link>
           </p>
         </div>
@@ -111,42 +106,14 @@ const SignUp = () => {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>First Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Last Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
                 <FormField
                   control={form.control}
-                  name="username"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Username</FormLabel>
+                      <FormLabel>Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="johndoe" {...field} />
+                        <Input placeholder="John Doe" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -159,7 +126,7 @@ const SignUp = () => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="you@example.com" type="email" {...field} />
+                        <Input placeholder="you@example.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

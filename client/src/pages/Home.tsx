@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import FloatingResumeCard from "@/components/ui/floating-resume-card";
 import FloatingJobCard from "@/components/ui/floating-job-card";
@@ -18,25 +18,40 @@ import featuresIllustration from "@/assets/images/features-illustration.svg";
 import scoreIllustration from "@/assets/images/score-illustration.svg";
 import resumeTemplatePreview from "@/assets/images/resume-template-preview.svg";
 
+// For authentication status, this will be replaced with real auth later
+const isAuthenticated = false;
+
 const Home = () => {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   
   const { data: templates } = useQuery<any[]>({
     queryKey: ['/api/templates'],
   });
 
+  const handleFeatureClick = (feature: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: `Please sign up or sign in to access the ${feature} feature.`,
+      });
+      setLocation("/sign-up");
+      return false;
+    }
+    return true;
+  };
+
   const handleTemplateSelect = () => {
-    toast({
-      title: "Template selected",
-      description: "Please sign up or log in to continue building your resume.",
-    });
+    handleFeatureClick("Resume Builder");
   };
 
   const handlePricingSelect = (plan: string) => {
-    toast({
-      title: `${plan} plan selected`,
-      description: "Please sign up or log in to continue with this plan.",
-    });
+    if (handleFeatureClick("Premium Features")) {
+      toast({
+        title: `${plan} plan selected`,
+        description: "Your account has been updated with this plan.",
+      });
+    }
   };
 
   return (
@@ -59,11 +74,13 @@ const Home = () => {
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
                 <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                   <div className="rounded-md shadow">
-                    <Link href="/resume-builder">
-                      <Button size="lg" className="w-full">
-                        Build My Resume
-                      </Button>
-                    </Link>
+                    <Button 
+                      size="lg" 
+                      className="w-full"
+                      onClick={() => handleFeatureClick("Resume Builder") && setLocation("/resume-builder")}
+                    >
+                      Build My Resume
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -210,11 +227,12 @@ const Home = () => {
                 </ul>
               </div>
               <div className="mt-8">
-                <Link href="/resume-score">
-                  <Button className="w-full sm:w-auto">
-                    Score My Resume
-                  </Button>
-                </Link>
+                <Button 
+                  className="w-full sm:w-auto"
+                  onClick={() => handleFeatureClick("Resume Score") && setLocation("/resume-score")}
+                >
+                  Score My Resume
+                </Button>
               </div>
             </div>
             <div className="mt-12 lg:mt-0 lg:col-span-7">
@@ -278,10 +296,14 @@ const Home = () => {
           </div>
 
           <div className="mt-12 text-center">
-            <Link href="/resume-builder" className="inline-flex items-center text-base font-medium text-primary-600 hover:text-primary-500">
+            <Button
+              variant="link"
+              onClick={() => handleFeatureClick("Template Library") && setLocation("/resume-builder")}
+              className="inline-flex items-center text-base font-medium text-primary-600 hover:text-primary-500"
+            >
               View all templates
               <i className="ri-arrow-right-line ml-1"></i>
-            </Link>
+            </Button>
           </div>
         </div>
       </section>

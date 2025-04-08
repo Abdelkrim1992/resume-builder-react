@@ -48,16 +48,20 @@ const Navbar = () => {
               ))}
             </div>
           </div>
+          
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            <Link href="/login" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
-              Login
+            <Link href="/login">
+              <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                Login
+              </Button>
             </Link>
-            <Link href="/signup">
-              <Button className="ml-2" size="sm">
+            <Link href="/sign-up">
+              <Button className="ml-4">
                 Sign Up
               </Button>
             </Link>
           </div>
+          
           <div className="-mr-2 flex items-center sm:hidden">
             <button
               type="button"
@@ -92,19 +96,17 @@ const Navbar = () => {
             ))}
           </div>
           <div className="pt-4 pb-3 border-t border-gray-200">
-            <div className="flex items-center px-4">
-              <div className="flex-shrink-0">
-                <Link href="/login" className="text-gray-700 block px-3 py-2 rounded-md text-base font-medium">
+            <div className="flex items-center px-4 space-x-3">
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" size="sm" className="w-full">
                   Login
-                </Link>
-              </div>
-              <div className="ml-3">
-                <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
-                  <Button size="sm" className="w-full">
-                    Sign Up
-                  </Button>
-                </Link>
-              </div>
+                </Button>
+              </Link>
+              <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>
+                <Button size="sm" className="w-full">
+                  Sign Up
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
