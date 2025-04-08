@@ -5,15 +5,16 @@ import { queryClient } from "./lib/queryClient";
 import App from "./App";
 import "./index.css";
 
-// Use a fixed Publishable Key from the documentation
-// This is safe to expose in the client code
-const PUBLISHABLE_KEY = "pk_test_Y2xhc3NpYy1tYW1tb3RoLTI4LmNsZXJrLmFjY291bnRzLmRldiQ";
+// Get the key directly from the .env file (already loaded)
+const CLERK_PUBLISHABLE_KEY = "pk_test_Y2xhc3NpYy1tYW1tb3RoLTI4LmNsZXJrLmFjY291bnRzLmRldiQ";
+
+console.log("Using Clerk key:", CLERK_PUBLISHABLE_KEY);
 
 function Main() {
   try {
     return (
       <ClerkProvider 
-        publishableKey={PUBLISHABLE_KEY}
+        publishableKey={CLERK_PUBLISHABLE_KEY}
         afterSignOutUrl="/"
       >
         <QueryClientProvider client={queryClient}>
