@@ -10,6 +10,43 @@
   body {
     @apply font-sans antialiased bg-gray-50 text-foreground;
   }
+  
+  /* Clerk Auth Form Styling */
+  .cl-rootBox {
+    @apply flex justify-center w-full;
+  }
+  
+  .cl-card {
+    @apply shadow-none bg-transparent;
+  }
+  
+  .cl-headerTitle, .cl-headerSubtitle, .cl-socialButtonsBlockButton {
+    @apply text-foreground;
+  }
+  
+  .cl-dividerText {
+    @apply text-muted-foreground;
+  }
+  
+  .cl-formFieldLabel {
+    @apply text-foreground;
+  }
+  
+  .cl-formFieldInput {
+    @apply border-input bg-background text-foreground focus:ring-primary;
+  }
+  
+  .cl-formButtonPrimary {
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground;
+  }
+  
+  .cl-footerActionText, .cl-footerActionLink {
+    @apply text-muted-foreground;
+  }
+  
+  .cl-footerActionLink {
+    @apply text-primary;
+  }
 }
 
 @layer components {

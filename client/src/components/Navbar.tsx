@@ -1,12 +1,32 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { 
+  Menu, 
+  User as UserIcon, 
+  LogOut, 
+  ChevronDown
+} from "lucide-react";
 import logoImage from "@/assets/images/logo.svg";
+import { useUser, useClerk } from "@clerk/clerk-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 
 const Navbar = () => {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isSignedIn, user } = useUser();
+  const { signOut } = useClerk();
 
   const navLinks = [
     { path: "/", label: "Resume", exact: true },
@@ -22,8 +42,18 @@ const Navbar = () => {
     return location.startsWith(path);
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (!user?.firstName && !user?.lastName) return "U";
+    return `${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`;
+  };
+
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="bg-background border-b sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -39,8 +69,8 @@ const Navbar = () => {
                   href={link.path}
                   className={`${
                     isActive(link.path, link.exact)
-                      ? "border-primary-500 text-gray-900"
-                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                      ? "border-primary text-foreground"
+                      : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
                   } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                 >
                   {link.label}
@@ -50,22 +80,50 @@ const Navbar = () => {
           </div>
           
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            <Link href="/login">
-              <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
-                Login
-              </Button>
-            </Link>
-            <Link href="/sign-up">
-              <Button className="ml-4">
-                Sign Up
-              </Button>
-            </Link>
+            {isSignedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center space-x-2 text-base">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user?.imageUrl} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                    <span className="max-w-[100px] truncate">{user?.fullName || user?.username}</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem className="flex items-center space-x-2" disabled>
+                    <UserIcon className="h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="flex items-center space-x-2 text-destructive focus:text-destructive" onClick={handleSignOut}>
+                    <LogOut className="h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button className="ml-4">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
           
           <div className="-mr-2 flex items-center sm:hidden">
             <button
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+              className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
               aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
@@ -86,8 +144,8 @@ const Navbar = () => {
                 href={link.path}
                 className={`${
                   isActive(link.path, link.exact)
-                    ? "bg-primary-50 border-primary-500 text-primary-700"
-                    : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+                    ? "bg-primary/10 border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:bg-accent hover:border-muted-foreground hover:text-foreground"
                 } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -95,19 +153,48 @@ const Navbar = () => {
               </Link>
             ))}
           </div>
-          <div className="pt-4 pb-3 border-t border-gray-200">
-            <div className="flex items-center px-4 space-x-3">
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>
-                <Button size="sm" className="w-full">
-                  Sign Up
-                </Button>
-              </Link>
-            </div>
+          <div className="pt-4 pb-3 border-t border-border">
+            {isSignedIn ? (
+              <div className="space-y-1">
+                <div className="flex items-center px-4 py-2">
+                  <div className="flex-shrink-0">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user?.imageUrl} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="ml-3">
+                    <div className="text-base font-medium text-foreground">{user?.fullName || user?.username}</div>
+                    <div className="text-sm font-medium text-muted-foreground">{user?.primaryEmailAddress?.emailAddress}</div>
+                  </div>
+                </div>
+                <Link href="#" className="block px-4 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>
+                  Profile
+                </Link>
+                <button 
+                  className="block w-full text-left px-4 py-2 text-base font-medium text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => {
+                    handleSignOut();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Log out
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center px-4 space-x-3">
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>
+                  <Button size="sm" className="w-full">
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
